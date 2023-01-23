@@ -1,0 +1,17 @@
+[package]
+name = "tinygit"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+git2 = {version = "0.16.1", default-features = false, features = ["https"]}
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+codegen-units = 1
+panic = "abort"
+
+[[bin]]
+name = "git"
