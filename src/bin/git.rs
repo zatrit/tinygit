@@ -13,7 +13,7 @@ fn main() {
 
     match command.as_str() {
         "clone" => {
-            let url = pos_args.get(2).expect("Specify URL").as_str();
+            let url = pos_args.get(2).expect("Specify URL");
 
             let url_split = url.trim_end_matches("/").split("/");
             let dest = pos_args
@@ -41,3 +41,4 @@ fn main() {
         }
     }
 }
+    
