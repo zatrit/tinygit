@@ -4,22 +4,22 @@ use std::{env, process::exit};
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
-    let pos_args = env::args()
-        .filter(|a| !a.starts_with("-"))
-        .collect::<Vec<String>>();
-    let command = pos_args.get(1).expect("Not enought args");
+    let mut pos_args = env::args().filter(|a| !a.starts_with("-")).skip(1);
+    let command = pos_args.next().expect("Not enought args");
 
     let quiet = env::args().any(|a| a == "--quiet" || a == "-q");
 
     match command.as_str() {
         "clone" => {
-            let url = pos_args.get(2).expect("Specify URL");
-
-            let url_split = url.trim_end_matches("/").split("/");
+            let url = pos_args.next().expect("Specify URL");
             let dest = pos_args
-                .get(3)
-                .map(String::as_str)
-                .or(url_split.last())
+                .next()
+                .or_else(|| {
+                    url.trim_end_matches("/")
+                        .split("/")
+                        .last()
+                        .map(str::to_string)
+                })
                 .expect("Unable to detect destination");
 
             if !quiet {
@@ -27,12 +27,12 @@ fn main() {
                 println!("Destination: {dest}");
             }
 
-            git2::Repository::clone(url, dest).expect("Failed to clone repository");
+            git2::Repository::clone(&url, dest).expect("Failed to clone repository");
         }
         "version" => println!("git version {VERSION}"),
         "rev-parse" => {
             let repo = git2::Repository::open_from_env().expect("Unable to open repository");
-            repo.revparse(pos_args.get(2).expect("Spec required"))
+            repo.revparse(&pos_args.next().expect("Spec required"))
                 .expect("Unable to rev-parse");
         }
         cmd => {
@@ -41,4 +41,3 @@ fn main() {
         }
     }
 }
-    
